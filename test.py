@@ -1,14 +1,10 @@
 import json 
-import pprint
-#json_data = open("\\Users\\limbo0710\\Documents\\Stanford\\Fall2014\\cs229\\projectData\\yelp_dataset_challenge_academic_dataset2\\yelp_academic_dataset_user.json")
-json_file = open("/Users/limbo0710/Documents/Stanford/Fall2014/cs229/projectData/yelp_dataset_challenge_academic_dataset2/yelp_academic_dataset_user.json")
-line = json_file.readline()
-print line
-data = json.loads(line,encoding = "utf-8")
-#pprint data[yelping_since]
-#pprint( data)
-print data
-print 'test: '+data[u'yelping_since']
-print 'test: '+data[yelping_since]
-json_file.close()
-
+def readUser(file = "/Users/limbo0710/Documents/Stanford/Fall2014/cs229/projectData/yelp_dataset_challenge_academic_dataset2/yelp_academic_dataset_user.json"): 
+#def readUser(file = "/Users/limbo0710/Documents/Stanford/Fall2014/cs229/projectData/yelp_dataset_challenge_academic_dataset2/oneObj.json"): 
+    userList = []
+    json_file = open(file)
+    for line in json_file:
+        data = json.loads(line,encoding = "utf-8")
+        userList.append(data)
+    json_file.close()
+readUser()
