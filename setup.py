@@ -131,62 +131,9 @@ def getBusinessRating(businessID, businessList):
         if businessID == business["business_id"]: 
             return business["stars"]
     return 3
-#represent 1,2,3 as neg, 4,5 as postive, for cs224w
-def triadInfo(userList, reviewList, businessList, revCountThreshold): 
-    totalUserCount = 0.0
-    #triad types:sign of edge u->v, v->w, u->w: index(0-7) = PPP, PPN, PNP, PNN, NPP, NPN, NNP, NNN
-    classifList = [0,0,0,0,0,0,0,0]
-    #for i in xrange(100000):
-    for user in userList:
-        if user["review_count"] >=revCountThreshold: 
-        #if userList[i]["review_count"] >=revCountThreshold: 
-            #list of reviews given by userID
-            userRevList = []
-            for review in reviewList: 
-                #if userList[i]["user_id"] == review["user_id"]:
-                if user["user_id"] == review["user_id"]:
-                    userRevList.append(review)
-            testRev = random.choice(userRevList)#random review to test on 
-            #loop through user reviews to see other edges in triad
-            triadList = []#list of (stars, deltaStatus) for each triad
-            for review in userRevList: 
-                if review == testRev: continue
-                deltaStatus = - getBusinessRating(review["business_id"], businessList) + testRev["stars"]
-                triadList.append((review["stars"], deltaStatus))
-            #classify each triad into 1 of 8 types
-            for triad in triadList: 
-                if triad[0]>=4 and triad[1]>0 and testRev["stars"]>=4: 
-                    classifList[0] += 1
-                elif triad[0]>=4 and triad[1]>0 and testRev["stars"]<4: 
-                    classifList[1] += 1
-                elif triad[0]>=4 and triad[1]<0 and testRev["stars"]>=4: 
-                    classifList[2] += 1
-                elif triad[0]>=4 and triad[1]<0 and testRev["stars"]<4: 
-                    classifList[3] += 1
-                elif triad[0]<4 and triad[1]>0 and testRev["stars"]>=4: 
-                    classifList[4] += 1
-                elif triad[0]<4 and triad[1]>0 and testRev["stars"]<4: 
-                    classifList[5] += 1
-                elif triad[0]<4 and triad[1]<0 and testRev["stars"]>=4: 
-                    classifList[6] += 1
-                elif triad[0]<4 and triad[1]<0 and testRev["stars"]<4: 
-                    classifList[7] += 1
-            totalUserCount +=1
-    print "classifList: {0}".format(classifList)
-    print "totalUserCount: {0}".format(totalUserCount)
-    f = open('results.txt', 'w')
-    for item in classifList: 
-        f.write("%s\n" % item)
-    f.write("totalUserCount: %s\n" % totalUserCount)
-    f.close()
-    return
-
 userList = readUser()
 reviewList = readReview()
 businessList = readBusiness()
 #runBaseline2(userList, reviewList, businessList, 100)
-triadInfo(userList, reviewList, businessList, 10)
 #runBaseline1(userList, reviewList, 0)
 #print getNumUserRev(userList, 50,float("inf"))
-    
-
