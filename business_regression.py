@@ -113,7 +113,7 @@ def businessRegression(bId, trainRatio, features, minNum = 10):
 def run():
     output = open('output.txt', 'wb')
     business = ['jf67Z1pnwElRSXllpQHiJg', 'PXviRcHR1mqdH4vRc2LEAQ', '2e2e7WgqU1BnpxmQL5jbfw', '4bEjOyTaDG24SY5TxsaUNQ']
-    totalFeatures = ['review_count', 'average_stars', 'friends'] #, 'votes,funny', 'votes,useful', 'votes,cool'] 
+    totalFeatures = ['review_count', 'average_stars', 'friends', 'votes,funny', 'votes,useful', 'votes,cool'] 
     
     length = len(totalFeatures)
     bi = bin(1)[2:].zfill(length)
@@ -136,6 +136,8 @@ def run():
         print 'Finished with feature set: ' + str(features)
     output.close()
 
+run()
+
 def analyze():
     feature_data = open('feature_validation_data.json')
     for line in feature_data:
@@ -155,7 +157,7 @@ def analyze():
     feature_data.close()
 
 
-analyze()
+#analyze()
 
 
 
