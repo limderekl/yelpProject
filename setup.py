@@ -54,7 +54,10 @@ def readReview(file = "smallReview.json"):
         wantedList = ["business_id", "user_id", "stars", "date", "votes"]
         for item in wantedList: 
             newData[item] = data[item]
-        reviewDict[newData["user_id"]+","+newData["business_id"] ] = newData
+        if newData["business_id"] in reviewDict:
+            reviewDict[newData["business_id"]].append(newData) # = newData
+        else:
+            reviewDict[newData["business_id"]] = [newData]
     json_file.close()
     return reviewDict
 def readCheckin(file = dataDir+"yelp_academic_dataset_checkin.json"): 
@@ -157,14 +160,14 @@ def getBusinessRating(businessID, businessList):
         if businessID == business["business_id"]: 
             return business["stars"]
     return 3
-userDict = readUser()
-reviewDict = readReview()
-businessDict = readBusiness()
-print "userDict : {0}".format(userDict)
-print ""
-print "reviewDict: {0}".format(reviewDict)
-print ""
-print "businessDict: {0}".format(businessDict)
+# userDict = readUser()
+# reviewDict = readReview()
+# businessDict = readBusiness()
+# print "userDict : {0}".format(userDict)
+# print ""
+# print "reviewDict: {0}".format(reviewDict)
+# print ""
+# print "businessDict: {0}".format(businessDict)
 
 #runBaseline2(userList, reviewList, businessList, 100)
 #runBaseline1(userList, reviewList, 0)
