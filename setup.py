@@ -5,32 +5,58 @@ import random
 #set directory which data is located
 #dataDir = "/Users/limbo0710/Documents/Stanford/Fall2014/cs229/projectData/yelp_dataset_challenge_academic_dataset2/"
 dataDir = "/afs/.ir.stanford.edu/users/l/i/limderek/cs229/yelpProject/projectData/" #located on corn
-#returns a list of dicts, each dict is a user or business or review object. 
-def readUser(file = dataDir+"yelp_academic_dataset_user.json"): 
-#def readUser(file = "/Users/limbo0710/Documents/Stanford/Fall2014/cs229/projectData/yelp_dataset_challenge_academic_dataset2/oneObj.json"): 
-    userList = []
+#returns a dict of dicts, each inner dict is a user or business or review object. 
+#outer dict indexed by user_id
+#def readUser(file = dataDir+"yelp_academic_dataset_user.json"): 
+def readUser(file = "smallUser.json"):
+    userDict= {}
     json_file = open(file)
     for line in json_file:
         data = json.loads(line,encoding = "utf-8")
-        userList.append(data)
+        #extracts only wanted features
+        newData = {}
+        newData["friends"] = len(data["friends"])# of friends
+        wantedList = ["user_id", "review_count", "average_stars", "votes", "elite", "yelping_since", "fans"]
+        for item in wantedList: 
+            newData[item] = data[item]
+        userDict[newData["user_id"]] = newData
     json_file.close()
-    return userList
-def readBusiness(file = dataDir+"yelp_academic_dataset_business.json"): 
-    businessList = []
+    return userDict
+#outer dict indexed by business_id
+#def readBusiness(file = dataDir+"yelp_academic_dataset_business.json"): 
+def readBusiness(file = "smallBusiness.json"):
+    businessDict = {}
     json_file = open(file)
     for line in json_file:
         data = json.loads(line,encoding = "utf-8")
-        businessList.append(data)
+        #extracts wanted features
+        newData = {}
+        wantedList = ["business_id", "stars", "review_count", "categories"]
+        for item in wantedList: 
+            newData[item] = data[item]
+        #extra price range from attributes, if none set as None
+        if "Price Range" in data["attributes"]: 
+            newData["price_range"] = data["attributes"]["Price Range"]
+        else: 
+            newData["price_range"] = None
+        businessDict[newData["business_id"]] = newData
     json_file.close()
-    return businessList
-def readReview(file = dataDir+"yelp_academic_dataset_review.json"): 
-    reviewList = []
+    return businessDict
+#outer dict indexed by "user_id,business_id"
+#def readReview(file = dataDir+"yelp_academic_dataset_review.json"): 
+def readReview(file = "smallReview.json"):
+    reviewDict = {}
     json_file = open(file)
     for line in json_file:
         data = json.loads(line,encoding = "utf-8")
-        reviewList.append(data)
+        #extracts wanted features
+        newData = {}
+        wantedList = ["business_id", "user_id", "stars", "date", "votes"]
+        for item in wantedList: 
+            newData[item] = data[item]
+        reviewDict[newData["user_id"]+","+newData["business_id"] ] = newData
     json_file.close()
-    return reviewList
+    return reviewDict
 def readCheckin(file = dataDir+"yelp_academic_dataset_checkin.json"): 
     checkinList = []
     json_file = open(file)
@@ -131,9 +157,15 @@ def getBusinessRating(businessID, businessList):
         if businessID == business["business_id"]: 
             return business["stars"]
     return 3
-userList = readUser()
-reviewList = readReview()
-businessList = readBusiness()
+userDict = readUser()
+reviewDict = readReview()
+businessDict = readBusiness()
+print "userDict : {0}".format(userDict)
+print ""
+print "reviewDict: {0}".format(reviewDict)
+print ""
+print "businessDict: {0}".format(businessDict)
+
 #runBaseline2(userList, reviewList, businessList, 100)
 #runBaseline1(userList, reviewList, 0)
-#print getNumUserRev(userList, 50,float("inf"))
+#print getNumUserRev(userList, 100,float("inf"))
