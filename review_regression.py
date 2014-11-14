@@ -5,20 +5,7 @@ import json
 users = setup.readUser('Reduced_Yelp_Data/reduced_yelp_academic_dataset_user.json')
 business = setup.readBusiness('Reduced_Yelp_Data/reduced_yelp_academic_dataset_business.json')
 reviews = setup.readReview('Reduced_Yelp_Data/reduced_yelp_academic_dataset_review.json')
-######
 reviewPath = 'Reduced_Yelp_Data/reduced_yelp_academic_dataset_review.json'
-features = ['review_count', 'average_stars', 'friends']
-MIN_NUM = 80
-#########
-'''
-userFeatures = ['review_count', 'friends', 'fans']
-businessFeatures = ['review_count']
-allFeatures = ['u_review_count', 'u_friends', 'u_fans', 'b_review_count']
-
-userFeatures = ['average_stars']
-businessFeatures = ['stars']
-allFeatures = ['u_average_stars', 'b_stars']
-'''
 
 userFeatures = ['review_count', 'average_stars', 'friends', 'fans']
 businessFeatures = ['review_count', 'stars']
