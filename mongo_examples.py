@@ -7,8 +7,8 @@
 import credentials
 import mongo
 import json
-# connect to yelp database
 # remember to create the credentials.py file (see README.md)
+# connect to yelp database, this instantiates the Mongo class
 yelpDB = mongo.Mongo(credentials.mongo['user'], credentials.mongo['secret'], credentials.mongo['url'])
 
 # example of getting a single user object
