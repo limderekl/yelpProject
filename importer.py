@@ -1,14 +1,14 @@
+##########################################################################
+# THIS SCRIPT IS DEPRICATED SINCE MONGODB IS NOW INSTANTIATED AS A CLASS #
+##########################################################################
+
 # Data importer to Compose hosted MongoDB
 # This script should just be run one time to import all data to Mongo
-
-from pymongo import MongoClient
 import config
 import credentials
 import json
+import mongo
 
-def MongoConnect(user, secret, url):
-    client = MongoClient('mongodb://' + user + ':' + secret + '@' + url)
-    return client.playground
 
 def ImportUserCollection(db, datafile, fields):
     collection = db.user
@@ -65,7 +65,7 @@ def ImportReviewCollection(db, datafile, fields):
 
 # This function should only be run once to set up the database. Never again afterwards!!
 def DoImport():
-    db = MongoConnect(credentials.mongo['user'], credentials.mongo['secret'], credentials.mongo['url'])
+    # db = mongo.MongoConnect(credentials.mongo['user'], credentials.mongo['secret'], credentials.mongo['url'])
     # ImportUserCollection(db, config.data['user'], config.fields['user'])
     # ImportBusinessCollection(db, config.data['business'], config.fields['business'])
     # ImportReviewCollection(db, config.data['review'], config.fields['review'])
