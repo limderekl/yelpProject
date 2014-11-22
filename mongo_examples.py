@@ -3,13 +3,10 @@
 # in the class as this prevents data corruption (unwanted erasures, etc).
 # If we need a field to be added to all documents in a collection, tell
 # me and I'll run a migration.
-
-import credentials
 import mongo
-import json
 # remember to create the credentials.py file (see README.md)
 # connect to yelp database, this instantiates the Mongo class
-yelpDB = mongo.Mongo(credentials.mongo['user'], credentials.mongo['secret'], credentials.mongo['url'])
+yelpDB = mongo.Mongo()
 
 # example of getting a single user object
 user = yelpDB.GetUserById('Qtro4APUHh1wEwnVhciPPQ')

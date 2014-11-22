@@ -1,7 +1,11 @@
 from pymongo import MongoClient
+import credentials
 
 class Mongo():
-    def __init__(self, user, secret, url):
+    def __init__(self):
+        user = credentials.mongo['user']
+        secret = credentials.mongo['secret']
+        url = credentials.mongo['url']
         self.db = MongoClient('mongodb://' + user + ':' + secret + '@' + url).playground
         self.userCol = self.db.user
         self.businessCol = self.db.business
