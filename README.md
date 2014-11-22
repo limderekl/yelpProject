@@ -14,3 +14,7 @@ mongo = {
 ```
 where username and secret were emailed to you. Keep the url exactly as shown.
 
+Possible Improvements
+=====================
+
+In onboard_user.py line 19, may want to cast numerator and denominator of division to floats. This gives better granularity for categorical ratings. May want to cast all stars of type float for consistency.

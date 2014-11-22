@@ -2,19 +2,15 @@ import mongo
 import config
 
 def ClientOnboard(yelpDB, userId):
-    user = yelpDB.GetUserById(userId)
-    if 'feature' in user:
-        return
-    print userId
     reviews = yelpDB.GetReviewsByUserId(userId)
+    feature = {}
     for review in reviews:
         businessId = review['business_id']
         business = yelpDB.GetBusinessById(businessId)
         categories = business['categories']
-        feature = {}
         for i in range(0, len(categories)):
             c = categories[i]
-            if config.categories.count(c) != 0:      
+            if config.categories.count(c) != 0: 
                 if c in feature:
                     feature[c] = (feature[c][0] + int(review['stars']), feature[c][1] + 1) 
                 else:
@@ -28,6 +24,12 @@ def OnboardAll():
     users = yelpDB.GetAllUsers()
     for user in users:
         ClientOnboard(yelpDB, user['_id'])
+        print user['_id']
+    return
+
+def OnboardSingleUser(userId):
+    yelpDB = mongo.Mongo()
+    ClientOnboard(yelpDB, userId)
     return
 
 OnboardAll()
