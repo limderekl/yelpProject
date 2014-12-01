@@ -6,7 +6,7 @@ def GetStarPrediction(yelpDB, userId, businessId):
     reviews = yelpDB.GetReviewsByBusinessId(businessId)
     for review in reviews:
         userIds.append(review['user_id'])
-    stars = similarity.PredictStars(yelpDB, userId, userIds)
+    stars = similarity.PredictStars(yelpDB, userId, userIds, businessId)
     return stars
 
 def GetStars(userId, businessId):
