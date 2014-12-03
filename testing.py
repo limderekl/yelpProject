@@ -33,6 +33,7 @@ def Test():
         if abs(prediction-actual) > STAR_THRESHOLD:
             incorrect += 1
         total += 1
+        break
     print 'Average MSE is: ' + str(sum(errors) / float(total))
     print 'Error in star prediction is: ' + str(100.0 * float(incorrect) / float(total)) + '%'
     return
@@ -82,15 +83,4 @@ def GetTestData():
         print 'YAY! enough reviews for ' + business['_id']
     testFile.close()
 
-#Test()
-
-businessId = "GGyHZtnAA5LBgouB-32ARA"
-
-businesses = yelpDB.GetAllBusinesses()
-i = 0
-for b in businesses:
-    if b['_id'] == businessId:
-        break
-    else:
-        i += 1
-print i
+Test()
