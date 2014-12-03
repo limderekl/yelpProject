@@ -39,6 +39,10 @@ def PredictStars(yelpDB, userId, userIds, businessId, N):
 
     #sort cos sim, tuple of (user_id, similarity)
     sortSimList = sorted(simDict.items(), key = lambda x:x[1], reverse = True)
+    normSortSimList = []
+    for tup in sortSimList: 
+        print tup
+        normSortSimList.append((tup[0], float(tup[1])/2 + .5))
 
     simStars = []
     if N > len(sortSimList): 
@@ -51,18 +55,21 @@ def PredictStars(yelpDB, userId, userIds, businessId, N):
     weightStarSum = 0.0
     weightSimSum = 0.0
     for i1 in xrange(N):
-        simUserId = sortSimList[i1][0]
+        simUserId = normSortSimList[i1][0]
         simReview = yelpDB.GetReviewByUserAndBusinessId(simUserId, businessId)
         simStars.append(simReview['stars'])
-        weightStarSum += simReview['stars'] * sortSimList[i1][1]
-        weightSimSum +=sortSimList[i1][1]
+        weightStarSum += simReview['stars'] * normSortSimList[i1][1]
+        weightSimSum += abs(normSortSimList[i1][1])
+        print 'sim: ' + str(normSortSimList[i1][1])
     unweightStar = float(sum(simStars))/len(simStars)
+
     weightStar = weightStarSum/ weightSimSum
     print "userIds: " + str(userIds)
     print "cos sim: "+str(simDict)
     print "sim stars: "+str(simStars)
     #weighted avg
-    print 'most: ' + str(mostStar), + ' unweighted: '+str(unweightStar)+' weighted: '+str(weightStar)
+    print 'most: ' + str(mostStar) + ' unweighted: '+str(unweightStar)+' weighted: '+str(weightStar)
+    print 'star sum: ' + str(weightStarSum) + 'sim sum: ' + str(weightSimSum)
     return mostStar, unweightStar, weightStar
 
 def test(): 
@@ -87,7 +94,7 @@ def GetStarPrediction(yelpDB, userId, businessId):
         #user ids which have reviewed same business
         #?? need to handle duplicate user ids?
         userIds.append(review['user_id'])
-    stars = PredictStars(yelpDB, userId, userIds, businessId, 2)
+    stars = PredictStars(yelpDB, userId, userIds, businessId, 3)
     return stars
 
 def GetStars(userId, businessId):
