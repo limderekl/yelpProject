@@ -41,7 +41,7 @@ class Mongo():
         return reviews
 
     def GetReviewByUserAndBusinessId(self, userId, businessId):
-        return self.reviewCol.find({'user_id': userId, 'business_id': businessId})
+        return self.reviewCol.find_one({'user_id': userId, 'business_id': businessId})
 
     def SetUserFeatureSet(self, userId, feature):
         return self.userCol.update({'_id': userId}, {'$set': {'feature': feature}})
