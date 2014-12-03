@@ -4,7 +4,6 @@ import mongo
 # to reconnect to mongo here
 def PredictStars(yelpDB, userId, userIds, businessId, N):
     #userId: user for prediction, userIds: other users who have reviewed a given restaurant
-    stars = 0.0
     # get all feature arrays of users in userIds array and compare
     # to userId. Use top N similar users to predict userIds star
     # rating of that restaurant and return (stars should be type int)
@@ -15,21 +14,18 @@ def PredictStars(yelpDB, userId, userIds, businessId, N):
     simDict = {}
 
     predUserFeatVctr = yelpDB.GetUserById(userId)
-    rowAvg = float(sum(predUserFeatVctr['feature'].values())) / len(predUserFeatVctr['feature'].values())
-    #normalize feat values (sub mean)
+    rowAvg = float(sum(extractStars(predUserFeatVctr['feature'].values()))) / len(extractStars(predUserFeatVctr['feature'].values()))
+    #normalize feat values (sub mean), remove tup notation
     for key1, value1 in predUserFeatVctr['feature'].items(): 
-        predUserFeatVctr['feature'][key1] = value1 - rowAvg
+        predUserFeatVctr['feature'][key1] = value1[0] - rowAvg
 
     for userid1 in userIds: 
         tempFeatVctr = yelpDB.GetUserById(userid1)
-        rowAvg = float(sum(tempFeatVctr['feature'].values())) / len(tempFeatVctr['feature'].values())
-        #normalize feat values (sub mean)
+        rowAvg = float(sum(extractStars(tempFeatVctr['feature'].values()))) / len(extractStars(tempFeatVctr['feature'].values()))
+        #normalize feat values (sub mean), remove tup notation
         for key1, value1 in tempFeatVctr['feature'].items(): 
-            tempFeatVctr['feature'][key1] = value1 - rowAvg
+            tempFeatVctr['feature'][key1] = value1[0] - rowAvg
         usersFeatVctr.append(tempFeatVctr)
-        #for feat in tempFeatVctr['feature'].keys():
-            #if feat not in featList: 
-                #featList.append(feat)
     
     #computer cos similarity for each user
     userMagn = float(sum(x**2 for x in predUserFeatVctr['feature'].values())**.5)
@@ -41,20 +37,33 @@ def PredictStars(yelpDB, userId, userIds, businessId, N):
         tempMagn = float(sum(x**2 for x in tempUserVctr['feature'].values())**.5)
         simDict[tempUserVctr['_id']] = float(simSum) / (userMagn * tempMagn)
 
-    #sort cos sim
+    #sort cos sim, tuple of (user_id, similarity)
     sortSimList = sorted(simDict.items(), key = lambda x:x[1], reverse = True)
 
-    #pred using equal weight of top N 
     simStars = []
     if N > len(sortSimList): 
         N = len(sortSimList) 
+    
+    #most similar
+    mostStar = yelpDB.GetReviewByUserAndBusinessId(sortSimList[0][0], businessId)['stars']
+
+    #pred using equal weight of top N 
+    weightStarSum = 0.0
+    weightSimSum = 0.0
     for i1 in xrange(N):
         simUserId = sortSimList[i1][0]
         simReview = yelpDB.GetReviewByUserAndBusinessId(simUserId, businessId)
         simStars.append(simReview['stars'])
-    stars = float(sum(simStars))/len(simStars)
-    print stars
-    return stars
+        weightStarSum += simReview['stars'] * sortSimList[i1][1]
+        weightSimSum +=sortSimList[i1][1]
+    unweightStar = float(sum(simStars))/len(simStars)
+    weightStar = weightStarSum/ weightSimSum
+    print "userIds: " + str(userIds)
+    print "cos sim: "+str(simDict)
+    print "sim stars: "+str(simStars)
+    #weighted avg
+    print 'most: ' + str(mostStar), + ' unweighted: '+str(unweightStar)+' weighted: '+str(weightStar)
+    return mostStar, unweightStar, weightStar
 
 def test(): 
     yelpDB = mongo.Mongo()
@@ -64,6 +73,13 @@ def test():
     starPred = 0.0
     return starPred
 
+#turn a list of tuples: (star, count) to a list of stars
+def extractStars(tupleList): 
+    tempList = []
+    for tup1 in tupleList: 
+        #print tup1
+        tempList.append(tup1[0])
+    return tempList
 def GetStarPrediction(yelpDB, userId, businessId):
     userIds = []
     reviews = yelpDB.GetReviewsByBusinessId(businessId)
@@ -71,7 +87,7 @@ def GetStarPrediction(yelpDB, userId, businessId):
         #user ids which have reviewed same business
         #?? need to handle duplicate user ids?
         userIds.append(review['user_id'])
-    stars = PredictStars(yelpDB, userId, userIds, businessId, 5)
+    stars = PredictStars(yelpDB, userId, userIds, businessId, 2)
     return stars
 
 def GetStars(userId, businessId):
@@ -84,4 +100,5 @@ def GetStars(userId, businessId):
     else:
         return GetStarPrediction(yelpDB, userId, businessId)
 GetStars('EaVmK7PPnV5TAEvB_tg-sw', 'rdAdANPNOcvUtoFgcaY9KA')
+#GetStars('SEJWhA6MRIavK4b3pGxwTg', 'rdAdANPNOcvUtoFgcaY9KA')
 #test()
