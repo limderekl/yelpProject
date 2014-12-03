@@ -2,7 +2,7 @@ import mongo
 
 # yelpDB is passed from yelp.py and is a Mongo instance so no need 
 # to reconnect to mongo here
-def PredictStars(yelpDB, userId, userIds, businessId, N=2, user=None):
+def PredictStars(yelpDB, userId, userIds, businessId, N=5, user=None):
     #userId: user for prediction, userIds: other users who have reviewed a given restaurant
     # get all feature arrays of users in userIds array and compare
     # to userId. Use top N similar users to predict userIds star
@@ -36,13 +36,16 @@ def PredictStars(yelpDB, userId, userIds, businessId, N=2, user=None):
             if key1 in predUserFeatVctr['feature']: 
                 simSum += predUserFeatVctr['feature'][key1] * float(value1)
         tempMagn = float(sum(x**2 for x in tempUserVctr['feature'].values())**.5)
-        simDict[tempUserVctr['_id']] = float(simSum) / (userMagn * tempMagn)
+        if userMagn * tempMagn == 0.0:
+            simDict[tempUserVctr['_id']] = 0.0
+        else:
+            simDict[tempUserVctr['_id']] = float(simSum) / (userMagn * tempMagn)
 
     #sort cos sim, tuple of (user_id, similarity)
     sortSimList = sorted(simDict.items(), key = lambda x:x[1], reverse = True)
     normSortSimList = []
     for tup in sortSimList: 
-        print tup
+        # print tup
         normSortSimList.append((tup[0], float(tup[1])/2 + .5))
 
     simStars = []
@@ -61,16 +64,16 @@ def PredictStars(yelpDB, userId, userIds, businessId, N=2, user=None):
         simStars.append(simReview['stars'])
         weightStarSum += simReview['stars'] * normSortSimList[i1][1]
         weightSimSum += abs(normSortSimList[i1][1])
-        print 'sim: ' + str(normSortSimList[i1][1])
+        # print 'sim: ' + str(normSortSimList[i1][1])
     unweightStar = float(sum(simStars))/len(simStars)
 
     weightStar = weightStarSum/ weightSimSum
-    print "userIds: " + str(userIds)
-    print "cos sim: "+str(simDict)
-    print "sim stars: "+str(simStars)
+    # print "userIds: " + str(userIds)
+    # print "cos sim: "+str(simDict)
+    # print "sim stars: "+str(simStars)
     #weighted avg
-    print 'most: ' + str(mostStar) + ' unweighted: '+str(unweightStar)+' weighted: '+str(weightStar)
-    print 'star sum: ' + str(weightStarSum) + 'sim sum: ' + str(weightSimSum)
+    # print 'most: ' + str(mostStar) + ' unweighted: '+str(unweightStar)+' weighted: '+str(weightStar)
+    # print 'star sum: ' + str(weightStarSum) + 'sim sum: ' + str(weightSimSum)
     return mostStar, unweightStar, weightStar
 
 # def test(): 

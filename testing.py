@@ -12,15 +12,18 @@ import mongo
 import yelp
 import config
 import json
+import copy
 
 yelpDB = mongo.Mongo()
 MIN_BUSINESS_REVIEWS = 10
 STAR_THRESHOLD = 1
-
+START = 0
+END = 10
 def Test():
     errors = []
     incorrect = 0
     total = 0
+    inc = 0
     testFile = open(config.data['test'], 'r')
     testVectors = {}
     for line in testFile:
@@ -28,29 +31,38 @@ def Test():
         testVectors[data['business_id']] = data['user_ids']
     testFile.close()
     for businessId in testVectors:
-        error, prediction, actual = GetUserStarPrediction(testVectors[businessId][0], businessId)
+        if inc < START:
+            inc += 1
+            continue
+        testUserId = testVectors[businessId][0]
+        testVectors[businessId].remove(testUserId)
+        error, prediction, actual = GetUserStarPrediction(testUserId, businessId, testVectors[businessId])
         errors.append(error ** 2)
         if abs(prediction-actual) > STAR_THRESHOLD:
             incorrect += 1
         total += 1
-        break
+        inc += 1
+        if inc > END:
+            break
+        print 'finished with test vector ' + str(total)
     print 'Average MSE is: ' + str(sum(errors) / float(total))
     print 'Error in star prediction is: ' + str(100.0 * float(incorrect) / float(total)) + '%'
     return
 
-def GetUserStarPrediction(userId, businessId):
+def GetUserStarPrediction(userId, businessId, userIds):
     # userId = '5W_Dv1E2loDsoXFpi-pqcQ'
     # businessId = 'SKLw05kEIlZcpTD5pqma8Q'
     user = yelpDB.GetUserById(userId)
     business = yelpDB.GetBusinessById(businessId)
     user['feature'] = AdjustUserFeatures(user, business)
     actual = yelpDB.GetStarsByUserAndBusinessId(userId, businessId)
-    prediction = yelp.GetStarPrediction(yelpDB, userId, businessId, user)
+    # most similar, unweighted avg, weighted avg
+    a, b, prediction = yelp.GetStarPrediction(yelpDB, userId, businessId, user=user, userIds=userIds)
     print 'Star Prediction: ' + str(prediction) + ' Actual: ' + str(actual) 
     return (abs(float(prediction) - float(actual)), prediction, actual) 
 
 def AdjustUserFeatures(user, business):
-    adjFeatures = user['feature']
+    adjFeatures = copy.deepcopy(user['feature'])
     review = yelpDB.GetReviewByUserAndBusinessId(user['_id'], business['_id'])
     stars = review['stars']
     businessCategories = business['categories']
@@ -59,9 +71,10 @@ def AdjustUserFeatures(user, business):
             adjFeatures[c][0] = adjFeatures[c][0] * adjFeatures[c][1] - stars
             adjFeatures[c][1] -= 1
             if adjFeatures[c][1] == 0:
-                adjFeatures[c][0] = 0
+                del adjFeatures[c]
+                # adjFeatures[c][0] = 0
             else:
-                adjFeatures[c][0] /= adjFeatures[c][1]
+                adjFeatures[c][0] = adjFeatures[c][0] / adjFeatures[c][1]
     return adjFeatures
 
 def GetTestData():
