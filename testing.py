@@ -18,10 +18,14 @@ yelpDB = mongo.Mongo()
 MIN_BUSINESS_REVIEWS = 10
 STAR_THRESHOLD = 1
 START = 0
-END = 10
+END = 100
 def Test():
-    errors = []
-    incorrect = 0
+    mostErrors = []
+    unweightErrors = []
+    weightErrors = []
+    mostIncorrect = 0
+    unweightIncorrect = 0
+    weightIncorrect = 0
     total = 0
     inc = 0
     testFile = open(config.data['test'], 'r')
@@ -36,17 +40,23 @@ def Test():
             continue
         testUserId = testVectors[businessId][0]
         testVectors[businessId].remove(testUserId)
-        error, prediction, actual = GetUserStarPrediction(testUserId, businessId, testVectors[businessId])
-        errors.append(error ** 2)
-        if abs(prediction-actual) > STAR_THRESHOLD:
-            incorrect += 1
+        mostError, mostPred, unweightError, unweightPred, weightError, weightPred, actual = GetUserStarPrediction(testUserId, businessId, testVectors[businessId])
+        mostErrors.append(mostError ** 2)
+        unweightErrors.append(unweightError ** 2)
+        weightErrors.append(weightError ** 2)
+        if abs(mostPred - actual) > STAR_THRESHOLD:
+            mostIncorrect += 1
+        if abs(unweightPred - actual) > STAR_THRESHOLD:
+            unweightIncorrect += 1
+        if abs(weightPred - actual) > STAR_THRESHOLD:
+            weightIncorrect += 1
         total += 1
         inc += 1
         if inc > END:
             break
         print 'finished with test vector ' + str(total)
-    print 'Average MSE is: ' + str(sum(errors) / float(total))
-    print 'Error in star prediction is: ' + str(100.0 * float(incorrect) / float(total)) + '%'
+    print 'Average MSE is: ' + 'most: '+str(sum(mostErrors) / float(total))+ ', unweight: '+str(sum(unweightErrors) / float(total))+ ', weight: '+str(sum(weightErrors) / float(total))
+    print 'Error in star prediction is: ' + 'most: '+ str(100.0 * float(mostIncorrect) / float(total)) + '%'+ ', unweight: '+ str(100.0 * float(unweightIncorrect) / float(total)) + '%'+ ', weight: '+ str(100.0 * float(weightIncorrect) / float(total)) + '%'
     return
 
 def GetUserStarPrediction(userId, businessId, userIds):
@@ -57,9 +67,11 @@ def GetUserStarPrediction(userId, businessId, userIds):
     user['feature'] = AdjustUserFeatures(user, business)
     actual = yelpDB.GetStarsByUserAndBusinessId(userId, businessId)
     # most similar, unweighted avg, weighted avg
-    a, b, prediction = yelp.GetStarPrediction(yelpDB, userId, businessId, user=user, userIds=userIds)
-    print 'Star Prediction: ' + str(prediction) + ' Actual: ' + str(actual) 
-    return (abs(float(prediction) - float(actual)), prediction, actual) 
+    mostPred, unweightPred, weightPred = yelp.GetStarPrediction(yelpDB, userId, businessId, user=user, userIds=userIds)
+    print 'Star Prediction: ' + 'most: ' + str(mostPred)+ ', unweight: ' + str(unweightPred)+ ', weight: ' + str(weightPred) + ' Actual: ' + str(actual) 
+    return (abs(float(mostPred) - float(actual)), mostPred, abs(float(unweightPred) - float(actual)), unweightPred, abs(float(weightPred) - float(actual)), weightPred, actual)
+    #most error, most pred, unweight error, unweight pred, weight error, weight hpred, actual
+
 
 def AdjustUserFeatures(user, business):
     adjFeatures = copy.deepcopy(user['feature'])
