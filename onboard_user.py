@@ -12,11 +12,11 @@ def ClientOnboard(yelpDB, userId):
             c = categories[i]
             if config.categories.count(c) != 0: 
                 if c in feature:
-                    feature[c] = (feature[c][0] + int(review['stars']), feature[c][1] + 1) 
+                    feature[c] = (feature[c][0] + float(review['stars']), feature[c][1] + 1) 
                 else:
-                    feature[c] = (int(review['stars']), 1)
+                    feature[c] = (float(review['stars']), 1)
     for key in feature:
-        feature[key] = feature[key][0] / feature[key][1]
+        feature[key] = (feature[key][0] / feature[key][1], feature[key][1])
     return yelpDB.SetUserFeatureSet(userId, feature)
 
 def OnboardAll():

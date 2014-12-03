@@ -2,19 +2,20 @@ import mongo
 
 # yelpDB is passed from yelp.py and is a Mongo instance so no need 
 # to reconnect to mongo here
-def PredictStars(yelpDB, userId, userIds, businessId, N):
+def PredictStars(yelpDB, userId, userIds, businessId, N=2, user=None):
     #userId: user for prediction, userIds: other users who have reviewed a given restaurant
     stars = 0.0
     # get all feature arrays of users in userIds array and compare
     # to userId. Use top N similar users to predict userIds star
     # rating of that restaurant and return (stars should be type int)
-    user = yelpDB.GetUserById('EaVmK7PPnV5TAEvB_tg-sw')
+    if user == None:
+        user = yelpDB.GetUserById(userId)
     #get feature vectors for all users 
     usersFeatVctr = []
     featList = []
     simDict = {}
 
-    predUserFeatVctr = yelpDB.GetUserById(userId)
+    predUserFeatVctr = user
     rowAvg = float(sum(predUserFeatVctr['feature'].values())) / len(predUserFeatVctr['feature'].values())
     #normalize feat values (sub mean)
     for key1, value1 in predUserFeatVctr['feature'].items(): 
@@ -56,32 +57,32 @@ def PredictStars(yelpDB, userId, userIds, businessId, N):
     print stars
     return stars
 
-def test(): 
-    yelpDB = mongo.Mongo()
-    user = yelpDB.GetUserById('EaVmK7PPnV5TAEvB_tg-sw')
-    print user['feature'] 
-    print user
-    starPred = 0.0
-    return starPred
+# def test(): 
+#     yelpDB = mongo.Mongo()
+#     user = yelpDB.GetUserById('EaVmK7PPnV5TAEvB_tg-sw')
+#     print user['feature'] 
+#     print user
+#     starPred = 0.0
+#     return starPred
 
-def GetStarPrediction(yelpDB, userId, businessId):
-    userIds = []
-    reviews = yelpDB.GetReviewsByBusinessId(businessId)
-    for review in reviews:
-        #user ids which have reviewed same business
-        #?? need to handle duplicate user ids?
-        userIds.append(review['user_id'])
-    stars = PredictStars(yelpDB, userId, userIds, businessId, 5)
-    return stars
+# def GetStarPrediction(yelpDB, userId, businessId):
+#     userIds = []
+#     reviews = yelpDB.GetReviewsByBusinessId(businessId)
+#     for review in reviews:
+#         #user ids which have reviewed same business
+#         #?? need to handle duplicate user ids?
+#         userIds.append(review['user_id'])
+#     stars = PredictStars(yelpDB, userId, userIds, businessId, 5)
+#     return stars
 
-def GetStars(userId, businessId):
-    yelpDB = mongo.Mongo()
-    #review to be predicted on
-    review = yelpDB.GetReviewByUserAndBusinessId(userId, businessId)
-    if review != None:
-        print review
-        return review['stars']
-    else:
-        return GetStarPrediction(yelpDB, userId, businessId)
-GetStars('EaVmK7PPnV5TAEvB_tg-sw', 'rdAdANPNOcvUtoFgcaY9KA')
-#test()
+# def GetStars(userId, businessId):
+#     yelpDB = mongo.Mongo()
+#     #review to be predicted on
+#     review = yelpDB.GetReviewByUserAndBusinessId(userId, businessId)
+#     if review != None:
+#         print review
+#         return review['stars']
+#     else:
+#         return GetStarPrediction(yelpDB, userId, businessId)
+# GetStars('EaVmK7PPnV5TAEvB_tg-sw', 'rdAdANPNOcvUtoFgcaY9KA')
+# #test()

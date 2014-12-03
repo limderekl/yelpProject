@@ -43,6 +43,12 @@ class Mongo():
     def GetReviewByUserAndBusinessId(self, userId, businessId):
         return self.reviewCol.find_one({'user_id': userId, 'business_id': businessId})
 
+    def GetStarsByUserAndBusinessId(self, userId, businessId):
+        review = self.reviewCol.find_one({'user_id': userId, 'business_id': businessId})
+        if review != None:
+            return review['stars']
+        return None
+    
     def SetUserFeatureSet(self, userId, feature):
         return self.userCol.update({'_id': userId}, {'$set': {'feature': feature}})
 

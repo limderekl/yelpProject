@@ -1,7 +1,8 @@
 data = {
     'user': 'Reduced_Yelp_Data/reduced_yelp_academic_dataset_user.json',
     'business': 'Reduced_Yelp_Data/restaurants.json',
-    'review': 'Reduced_Yelp_Data/reduced_yelp_academic_dataset_review.json'
+    'review': 'Reduced_Yelp_Data/reduced_yelp_academic_dataset_review.json',
+    'test': 'Reduced_Yelp_Data/test_data2.json'
 }
 
 fields = {
