@@ -1,5 +1,17 @@
 import mongo 
+import time
 
+# def TestPredictStars(yelpDB, user, userIds, businessId, N=5):
+#     featureVectors = {}
+#     businessReviews = {}
+#     start = time.time()
+#     for userId in userIds:
+#         u = yelpDB.GetUserById(userId)
+#         br = yelpDB.GetReviewByUserAndBusinessId(userId, businessId)
+#         featureVectors[u['_id']] = u['feature']
+#         businessReviews[u['_id']] = br['stars']
+#     print time.time() - start
+#     return (0, 0, 0)
 # yelpDB is passed from yelp.py and is a Mongo instance so no need 
 # to reconnect to mongo here
 def PredictStars(yelpDB, userId, userIds, businessId, N=5, user=None):
@@ -22,6 +34,7 @@ def PredictStars(yelpDB, userId, userIds, businessId, N=5, user=None):
 
     for userid1 in userIds: 
         tempFeatVctr = yelpDB.GetUserById(userid1)
+        tempFeatVctr['feature']['average_stars'] = (tempFeatVctr['average_stars'], 1)
         rowAvg = float(sum(extractStars(tempFeatVctr['feature'].values()))) / len(extractStars(tempFeatVctr['feature'].values()))
         #normalize feat values (sub mean), remove tup notation
         for key1, value1 in tempFeatVctr['feature'].items(): 

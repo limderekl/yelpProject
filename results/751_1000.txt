@@ -1,0 +1,3 @@
+Average Abs Error is: most:0.843373493976, unweight: 0.812048192771, weight: 0.800611624825
+Average MSE is: most: 1.47791164659, unweight: 1.1021686747, weight: 1.07919339006
+Error in star prediction is: most: 18.4738955823%, unweight: 27.3092369478%, weight: 32.9317269076%
