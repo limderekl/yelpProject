@@ -1,0 +1,14 @@
+import mongo
+yelpDB = mongo.Mongo()
+
+def wrapper(userId, businessId):
+	reviews = yelpDB.GetReviewsByBusinessId(businessId)
+	users = []
+	i = 0
+	for review in reviews:
+		i += 1
+		users.append(yelpDB.GetUserById(review['user_id']))
+		if i > 5:
+			break
+	print users
+wrapper('Qtro4APUHh1wEwnVhciPPQ','SKLw05kEIlZcpTD5pqma8Q')

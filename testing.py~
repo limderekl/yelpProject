@@ -71,7 +71,8 @@ def GetUserStarPrediction(userId, businessId, userIds, i):
     actual = yelpDB.GetStarsByUserAndBusinessId(userId, businessId)
     # most similar, unweighted avg, weighted avg
     mostPred, unweightPred, weightPred = yelp.GetStarPrediction(yelpDB, userId, businessId, i, user=user, userIds=userIds)
-    print 'Star Prediction: ' + 'most: ' + str(mostPred)+ ', unweight: ' + str(unweightPred)+ ', weight: ' + str(weightPred) + ' Actual: ' + str(actual) 
+	print 'Star Prediction: ' + 'most: ' + str(mostPred)+ ', unweight: ' + str(unweightPred)+ ', weight: ' + str(weightPred) + ' Actual: ' + str(actual) 
+    #print 'Star Prediction: ' + 'most: ' + str(mostPred)+ ', unweight: ' + str(unweightPred)+ ', weight: ' + str(weightPred) + ' Actual: ' + str(actual) 
     return (abs(float(mostPred) - float(actual)), mostPred, abs(float(unweightPred) - float(actual)), unweightPred, abs(float(weightPred) - float(actual)), weightPred, actual)
     #most error, most pred, unweight error, unweight pred, weight error, weight hpred, actual
 

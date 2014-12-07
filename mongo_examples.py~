@@ -13,7 +13,7 @@ user = yelpDB.GetUserById('Qtro4APUHh1wEwnVhciPPQ')
 print "1", user   # treat as a dictionary
 
 # example for setting the feature vector for a user
-user = yelpDB.SetUserFeatureSet('Qtro4APUHh1wEwnVhciPPQ', [2.5, 1, 5])
+user = yelpDB.SetUserFeatureSet('Qtro4APUHh1wEwnVhciPPQ', [1, 1, 5])
 print "2", user
 
 # example for getting all businesses, the index i is just used
