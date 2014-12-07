@@ -1,6 +1,7 @@
 import mongo
 import config
 import similarity
+import time
 
 def GetStarPrediction(yelpDB, userId, businessId, N, user=None, userIds=None):
     if userIds == None:
@@ -11,7 +12,6 @@ def GetStarPrediction(yelpDB, userId, businessId, N, user=None, userIds=None):
             #?? need to handle duplicate user ids?
             if userId != review['user_id']:
                 userIds.append(review['user_id'])
-
     stars = similarity.PredictStars(yelpDB, userId, userIds, businessId, N=N, user=user)
     return stars
 

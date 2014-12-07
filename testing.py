@@ -13,17 +13,41 @@ import yelp
 import config
 import json
 import copy
+import time
+import similarity
+import multiprocessing
+import threading
 
 yelpDB = mongo.Mongo()
 MIN_BUSINESS_REVIEWS = 10
 STAR_THRESHOLD = 1
 START = 0
-END = 1000
-def Test():
-    for i in range(20,21):	
+END = 100
+
+
+#		print i, 'Average MSE: unweight: '+str(sum(unweightErrors) / float(total))+ ', weight: '+str(sum(weightErrors) / float(total)),'  |  ', 'Error in star prediction: unweight: '+ str(100.0 * float(unweightIncorrect) / float(total)) + '%'+ ', weight: '+ str(100.0 * float(weightIncorrect) / float(total)) + '%'
+
+
+
+class multiTest(multiprocessing.Process):
+    def __init__(self, s, e):
+        multiprocessing.Process.__init__(self)
+        self.s = s
+        self.e = e
+    def run(self):
+        Test(self.s, self.e)
+
+def Test(start, end):
+	for i in range(20,21)
+		absErrors = []
 		mostErrors = []
 		unweightErrors = []
 		weightErrors = []
+
+		absMostErrors = []
+		absUnweightErrors = []
+		absWeightErrors = []
+
 		mostIncorrect = 0
 		unweightIncorrect = 0
 		weightIncorrect = 0
@@ -35,9 +59,8 @@ def Test():
 		    data = json.loads(line, 'utf-8')
 		    testVectors[data['business_id']] = data['user_ids']
 		testFile.close()
-
 		for businessId in testVectors:
-		    if inc < START:
+		    if inc < start:
 		        inc += 1
 		        continue
 		    testUserId = testVectors[businessId][0]
@@ -46,6 +69,11 @@ def Test():
 		    mostErrors.append(mostError ** 2)
 		    unweightErrors.append(unweightError ** 2)
 		    weightErrors.append(weightError ** 2)
+
+		    absMostErrors.append(abs(mostError))
+		    absUnweightErrors.append(unweightError)
+		    absWeightErrors.append(weightError)
+
 		    if abs(mostPred - actual) > STAR_THRESHOLD:
 		        mostIncorrect += 1
 		    if abs(unweightPred - actual) > STAR_THRESHOLD:
@@ -54,12 +82,16 @@ def Test():
 		        weightIncorrect += 1
 		    total += 1
 		    inc += 1
-		    if inc > END:
+		    if inc >= end:
 		        break
-		    #print 'finished with test vector ' + str(total)
-		print i, 'Average MSE: unweight: '+str(sum(unweightErrors) / float(total))+ ', weight: '+str(sum(weightErrors) / float(total)),'  |  ', 'Error in star prediction: unweight: '+ str(100.0 * float(unweightIncorrect) / float(total)) + '%'+ ', weight: '+ str(100.0 * float(weightIncorrect) / float(total)) + '%'
-		#print i, 'Average MSE is: ' + 'most: '+str(sum(mostErrors) / float(total))+ ', unweight: '+str(sum(unweightErrors) / float(total))+ ', weight: '+str(sum(weightErrors) / float(total))
-		#print i, 'Error in star prediction is: ' + 'most: '+ str(100.0 * float(mostIncorrect) / float(total)) + '%'+ ', unweight: '+ str(100.0 * float(unweightIncorrect) / float(total)) + '%'+ ', weight: '+ str(100.0 * float(weightIncorrect) / float(total)) + '%'
+		    print 'finished with test vector ' + str(inc)
+
+		resultFile = open('results/' + str(start) + '_' + str(end) + '.txt', 'w')
+		resultFile.write('Average Abs Error is: most:' + str(sum(absMostErrors) / float(total))  + ', unweight: ' + str(sum(absUnweightErrors) / float(total)) + ', weight: ' + str(sum(absWeightErrors) / float(total)) + '\n')
+		resultFile.write('Average MSE is: ' + 'most: '+str(sum(mostErrors) / float(total))+ ', unweight: '+str(sum(unweightErrors) / float(total))+ ', weight: '+str(sum(weightErrors) / float(total)) + '\n')
+		resultFile.write('Error in star prediction is: ' + 'most: '+ str(100.0 * float(mostIncorrect) / float(total)) + '%'+ ', unweight: '+ str(100.0 * float(unweightIncorrect) / float(total)) + '%'+ ', weight: '+ str(100.0 * float(weightIncorrect) / float(total)) + '%' + '\n')
+		resultFile.close()
+>>>>>>> 53e4af8240f2a3bab23178b659386aeb17b3ed93
     return
 
 def GetUserStarPrediction(userId, businessId, userIds, i):
@@ -70,7 +102,13 @@ def GetUserStarPrediction(userId, businessId, userIds, i):
     user['feature'] = AdjustUserFeatures(user, business)
     actual = yelpDB.GetStarsByUserAndBusinessId(userId, businessId)
     # most similar, unweighted avg, weighted avg
+<<<<<<< HEAD
     mostPred, unweightPred, weightPred = yelp.GetStarPrediction(yelpDB, userId, businessId, i, user=user, userIds=userIds)
+=======
+    # mostPred, unweightPred, weightPred = similarity.TestPredictStars(yelpDB, user, userIds, businessId)
+    mostPred, unweightPred, weightPred = yelp.GetStarPrediction(yelpDB, userId, businessId, user=user, userIds=userIds)
+
+>>>>>>> 53e4af8240f2a3bab23178b659386aeb17b3ed93
     print 'Star Prediction: ' + 'most: ' + str(mostPred)+ ', unweight: ' + str(unweightPred)+ ', weight: ' + str(weightPred) + ' Actual: ' + str(actual) 
     return (abs(float(mostPred) - float(actual)), mostPred, abs(float(unweightPred) - float(actual)), unweightPred, abs(float(weightPred) - float(actual)), weightPred, actual)
     #most error, most pred, unweight error, unweight pred, weight error, weight hpred, actual
@@ -90,6 +128,7 @@ def AdjustUserFeatures(user, business):
                 # adjFeatures[c][0] = 0
             else:
                 adjFeatures[c][0] = adjFeatures[c][0] / adjFeatures[c][1]
+    adjFeatures['average_stars'] = (user['average_stars'], 1)
     return adjFeatures
 
 def GetTestData():
@@ -111,4 +150,12 @@ def GetTestData():
         print 'YAY! enough reviews for ' + business['_id']
     testFile.close()
 
-Test()
+if __name__ == "__main__":  
+    test1 = multiTest(0, 250)
+    test2 = multiTest(251, 500)
+    test3 = multiTest(501, 750)
+    test4 = multiTest(751, 1000)
+    test1.start()
+    test2.start()
+    test3.start()
+    test4.start()
